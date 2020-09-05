@@ -28,6 +28,7 @@ namespace TamagotchiAPI.Controllers
             {
                 return Ok(await _context.Pets.ToListAsync());
             }
+
             [HttpGet("{id}")]
             public async Task<ActionResult<Pet>> GetPetByIdAsync(int id)
             {
@@ -38,6 +39,7 @@ namespace TamagotchiAPI.Controllers
                 }
                 return Ok(selectedPet);
             }
+
             [HttpPost("/Create_new_pet")]
             public async Task<ActionResult<Pet>> PostNewPetAsync(Pet petToCreate)
             {
@@ -48,6 +50,7 @@ namespace TamagotchiAPI.Controllers
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(null, null, petToCreate);
             }
+
             [HttpPost("{id}/Playtime")]
             public async Task<ActionResult<Pet>> PostPlayPetByIdAsync(int id)
             {
@@ -61,6 +64,7 @@ namespace TamagotchiAPI.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(selectedPet);
             }
+
             [HttpPost("{id}/Feeding")]
             public async Task<ActionResult<Pet>> PostFeedPetByIdAsync(int id)
             {
@@ -78,6 +82,7 @@ namespace TamagotchiAPI.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(selectedPet);
             }
+
             [HttpPost("{id}/Scolding")]
             public async Task<ActionResult<Pet>> PostScoldPetByIdAsync(int id)
             {
@@ -94,10 +99,12 @@ namespace TamagotchiAPI.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(selectedPet);
             }
+
             [HttpDelete("{id}")]
             public async Task<ActionResult<Pet>> DeletePetByIdAsync(int id)
             {
                 var selectedPet = await FindPetAsync(id);
+
                 if (selectedPet == null)
                 {
                     return NotFound();
