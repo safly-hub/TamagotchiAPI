@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 namespace TamagotchiAPI.Controllers
 {
-    [Route("api/[controller]“)]
+    [Route("api/[controller]")]
     [ApiController]
     public class PetController : ControllerBase
     {
