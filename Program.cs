@@ -23,7 +23,6 @@ namespace TamagotchiAPI
                     return;
                 }
             }
-
             var task = host.RunAsync();
 
             Utilities.Notify("TamagotchiAPI Running!");
