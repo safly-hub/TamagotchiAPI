@@ -4,115 +4,106 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-namespace TamagotchiAPI.Controllers
+using Microsoft.EntityFrameworkCore;
+using TamogotchiAPI.Models;
+namespace TamogotchiAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PetController : ControllerBase
+    public class PetsController : ControllerBase
     {
-        [ApiController]
-        [Route("[controller]")]
-        public class PetController : ControllerBase
+        private readonly DatabaseContext _context;
+        public PetsController(DatabaseContext context)
         {
-            private readonly DatabaseContext _context;
-            public PetController(DatabaseContext context)
+            _context = context;
+        }
+        private async Task<Pet> FindAsync(int petId)
+        {
+            return await _context.Pets.FirstOrDefaultAsync(pet => pet.PetId == petId);
+        }
+        [HttpGet]
+        private async Task<ActionResult<IEnumerable<Pet>>> GetPets()
+        {
+            return await _context.Pets.OrderBy(row => row.PetId).ToListAsync();
+        }
+        [HttpGet("{petId}")]
+        public async Task<ActionResult<Pet>> GetPet(int petId)
+        {
+            var pet = await _context.Pets.FindAsync(petId);
+            if (pet == null)
             {
-                _context = context;
+                return NotFound();
             }
-            private async Task<Pet> FindPetAsync(int id)
+            return pet;
+        }
+        [HttpPost("/CreatePet")]
+        public async Task<ActionResult<Pet>> PostNewPetAsync(Pet petToCreate)
+        {
+            petToCreate.Birthday = DateTime.Now;
+            petToCreate.HungerLevel = 0;
+            petToCreate.HappinessLevel = 0;
+            _context.Pets.Add(petToCreate);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(null, null, petToCreate);
+        }
+        [HttpDelete("{petId}")]
+        public async Task<ActionResult<Pet>> DeletePetByIdAsync(int petId)
+        {
+            var pet = await _context.Pets.FindAsync(petId);
+            if (pet == null)
             {
-                return await _context.Pets.FirstOrDefaultAsync(pet => pet.Id == id);
+                return NotFound();
             }
-            [HttpGet]
-            public async Task<ActionResult<IEnumerable<Pet>>> GetAllPetsAsync()
+            _context.Pets.Remove(pet);
+            await _context.SaveChangesAsync();
+            return Ok(pet);
+        }
+        [HttpPost("{petId}/Playtime")]
+        public async Task<ActionResult<Pet>> PostPlayPetByIdAsync(int petId, Playtime playtime)
+        {
+            var pet = await _context.Pets.FindAsync(petId);
+            if (pet == null)
             {
-                return Ok(await _context.Pets.ToListAsync());
+                return NotFound();
             }
-
-            [HttpGet("{id}")]
-            public async Task<ActionResult<Pet>> GetPetByIdAsync(int id)
+            playtime.When = DateTime.Now;
+            playtime.PetId = pet.PetId;
+            _context.Playtimes.Add(playtime);
+            pet.HappinessLevel += 5;
+            pet.HungerLevel += 3;
+            await _context.SaveChangesAsync();
+            return Ok(pet);
+        }
+        [HttpPost("{petId}/Feeding")]
+        public async Task<ActionResult<Pet>> PostFeedPetByIdAsync(int petId, Feeding feeding)
+        {
+            var pet = await _context.Pets.FindAsync(petId);
+            if (pet == null)
             {
-                var selectedPet = await FindPetAsync(id);
-                if (selectedPet == null)
-                {
-                    return NotFound();
-                }
-                return Ok(selectedPet);
+                return NotFound();
             }
-
-            [HttpPost("/Create_new_pet")]
-            public async Task<ActionResult<Pet>> PostNewPetAsync(Pet petToCreate)
+            feeding.When = DateTime.Now;
+            feeding.PetId = pet.PetId;
+            _context.Feedings.Add(feeding);
+            pet.HappinessLevel += 3;
+            pet.HungerLevel -= 5;
+            await _context.SaveChangesAsync();
+            return Ok(pet);
+        }
+        [HttpPost("{petId}/Scolding")]
+        public async Task<ActionResult<Pet>> PostScoldPetByIdAsync(int petId, Scolding scolding)
+        {
+            var pet = await _context.Pets.FindAsync(petId);
+            if (pet == null)
             {
-                petToCreate.Birthday = DateTime.Now;
-                petToCreate.HungerLevel = 0;
-                petToCreate.HappinessLevel = 0;
-                _context.Pets.Add(petToCreate);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction(null, null, petToCreate);
+                return NotFound();
             }
-
-            [HttpPost("{id}/Playtime")]
-            public async Task<ActionResult<Pet>> PostPlayPetByIdAsync(int id)
-            {
-                var selectedPet = await FindPetAsync(id);
-                if (selectedPet == null)
-                {
-                    return NotFound();
-                }
-                selectedPet.HappinessLevel += 5;
-                selectedPet.HungerLevel += 3;
-                await _context.SaveChangesAsync();
-                return Ok(selectedPet);
-            }
-
-            [HttpPost("{id}/Feeding")]
-            public async Task<ActionResult<Pet>> PostFeedPetByIdAsync(int id)
-            {
-                var selectedPet = await FindPetAsync(id);
-                if (selectedPet == null)
-                {
-                    return NotFound();
-                }
-                selectedPet.HappinessLevel += 3;
-                selectedPet.HungerLevel -= 5;
-                if (selectedPet.HungerLevel < 0)
-                {
-                    selectedPet.HungerLevel = 0;
-                }
-                await _context.SaveChangesAsync();
-                return Ok(selectedPet);
-            }
-
-            [HttpPost("{id}/Scolding")]
-            public async Task<ActionResult<Pet>> PostScoldPetByIdAsync(int id)
-            {
-                var selectedPet = await FindPetAsync(id);
-                if (selectedPet == null)
-                {
-                    return NotFound();
-                }
-                selectedPet.HappinessLevel -= 5;
-                if (selectedPet.HappinessLevel < 0)
-                {
-                    selectedPet.HappinessLevel = 0;
-                }
-                await _context.SaveChangesAsync();
-                return Ok(selectedPet);
-            }
-
-            [HttpDelete("{id}")]
-            public async Task<ActionResult<Pet>> DeletePetByIdAsync(int id)
-            {
-                var selectedPet = await FindPetAsync(id);
-
-                if (selectedPet == null)
-                {
-                    return NotFound();
-                }
-                _context.Pets.Remove(selectedPet);
-                await _context.SaveChangesAsync();
-                return Ok(selectedPet);
-            }
+            scolding.When = DateTime.Now;
+            scolding.PetId = pet.PetId;
+            _context.Scoldings.Add(scolding);
+            pet.HappinessLevel -= 5;
+            await _context.SaveChangesAsync();
+            return Ok(pet);
         }
     }
 }
