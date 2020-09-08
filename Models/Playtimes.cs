@@ -1,9 +1,10 @@
 using System;
-namespace TamagotchiAPI
-    public class Playtime
+namespace TamagotchiAPI.Models
 {
-    public int Id { get; set; }
-    public DateTime When { get; set; }
-    public int PetId { get; set; }
-}
+    public class Playtime
+    {
+        public int Id { get; set; }
+        public DateTime When { get; set; }
+        public int PetId { get; set; }
+    }
 }

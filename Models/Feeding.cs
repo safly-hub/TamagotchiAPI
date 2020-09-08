@@ -1,5 +1,5 @@
 using System;
-namespace TamogotchiAPI.Models
+namespace TamogotchiAPI.Feedings
 {
     public class Feeding
     {

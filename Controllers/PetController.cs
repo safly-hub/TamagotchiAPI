@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TamogotchiAPI.Models;
-namespace TamogotchiAPI.Controllers
+using TamagotchiAPI.Models;
+namespace TamagotchiAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
